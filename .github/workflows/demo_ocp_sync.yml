@@ -11,61 +11,27 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v3
+      - name: clone mw-shared-modules
+        uses: actions/checkout@v3
         with:
-          repository: openshift/openshift-docs
-          p
-          ref: enterprise-4.11
+          repository: inoxx03/mw-shared-modules
+          ref: master
 
       - name: config docs-bot
         run: |
           git config --global user.email "docs-bot@redhat.com"
           git config --global user.name "docs-bot"
 
-      - name: clone mw-shared-modules
-        uses: actions/checkout@v3
+      - name: clone ocp docs
+      - uses: actions/checkout@v3
         with:
-          repository: inoxx03/mw-shared-modules
-          ref: master
-          path: runtimes-common
-          ssh-key: ${{ secrets.DOCS_BOT_KEY }}
+          repository: openshift/openshift-docs
+          ref: enterprise-4.11
+          path: openshift-docs
 
-      - name: wipe helm-charts
+      - name: copy files
         run: |
-          cd helm-charts
-          rm -rf helm-charts
-
-      - name: rsync rst files
-        run: |
-          rsync -vr --delete --relative \
-            --exclude='**/*.html' \
-            --exclude='**/*.css' \
-            --exclude='**/*.js' \
-            --exclude='**/*.json' \
-            --exclude='**/*.yaml' \
-            --exclude='**/*.yml' \
-            --exclude='**/*.xml' \
-            --exclude='**/*.png' \
-            --exclude='**/*.svg' \
-            --exclude='**/*.ttf' \
-            --exclude='**/*.woff' \
-            --exclude='**/*.py' \
-            --exclude='**/*.eot' \
-            --exclude='**/*.po' \
-            --exclude='**/*.ico' \
-            --exclude='**/*.map' \
-            --exclude='**/*.txt' \
-            --exclude='**/*.conf' \
-            --exclude='**/Makefile' \
-            --exclude='_*/*' \
-            --exclude='**/_*/*' \
-            --exclude='**/locale/*' \
-            --exclude='userguide/*' \
-            --exclude='release-notes/*' \
-            --exclude='contrib/*' \
-            ./product-docs/**/ \
-            sync
-          rm -rf product-docs
+          cp openshift-docs/applications/working_with_helm_charts/*.adoc runtimes-common/
 
       - name: commit files
         run: |
@@ -75,6 +41,6 @@ jobs:
       - name: push changes
         uses: ad-m/github-push-action@master
         with:
-          directory: sync
+          directory: runtimes-common
           github_token: ${{ secrets.DOCS_BOT_PAT }}
-          branch: main
+          branch: TEST_ocp-helm-sync]
