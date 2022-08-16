@@ -17,11 +17,6 @@ jobs:
           repository: inoxx03/mw-shared-modules
           ref: master
 
-      - name: config docs-bot
-        run: |
-          git config --global user.email "docs-bot@redhat.com"
-          git config --global user.name "docs-bot"
-
       - name: clone ocp docs
       - uses: actions/checkout@v3
         with:
@@ -29,18 +24,11 @@ jobs:
           ref: enterprise-4.11
           path: openshift-docs
 
-      - name: copy files
-        run: |
-          cp openshift-docs/applications/working_with_helm_charts/*.adoc runtimes-common/
+      #- name: copy files
+      #  run: |
+      #    cp openshift-docs/applications/working_with_helm_charts/*.adoc runtimes-common/
 
       - name: commit files
         run: |
           git add . --all
           git diff-index --quiet HEAD || git commit -m "[TEST] Synchronize Helm Chart content form OpenShift docs"
-
-      - name: push changes
-        uses: ad-m/github-push-action@master
-        with:
-          directory: runtimes-common
-          github_token: ${{ secrets.DOCS_BOT_PAT }}
-          branch: TEST_ocp-helm-sync]
