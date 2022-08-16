@@ -1,4 +1,4 @@
-name: Synchronize Controller docs to asciidoc
+name: Synchronize Helm Chart content from OCP docs.
 
 on:
   schedule:
@@ -13,29 +13,27 @@ jobs:
 
       - uses: actions/checkout@v3
         with:
-          repository: ansible/aap-docs
-          ref: main
-
-      - name: install pandoc
-        run: sudo apt-get -y update && sudo apt-get -y install pandoc
+          repository: openshift/openshift-docs
+          p
+          ref: enterprise-4.11
 
       - name: config docs-bot
         run: |
           git config --global user.email "docs-bot@redhat.com"
           git config --global user.name "docs-bot"
 
-      - name: clone product-docs
+      - name: clone mw-shared-modules
         uses: actions/checkout@v3
         with:
-          repository: ansible/product-docs
-          ref: main
-          path: product-docs
+          repository: inoxx03/mw-shared-modules
+          ref: master
+          path: runtimes-common
           ssh-key: ${{ secrets.DOCS_BOT_KEY }}
 
-      - name: wipe controller-docs
+      - name: wipe helm-charts
         run: |
-          cd sync
-          rm -rf controller-docs
+          cd helm-charts
+          rm -rf helm-charts
 
       - name: rsync rst files
         run: |
@@ -69,17 +67,10 @@ jobs:
             sync
           rm -rf product-docs
 
-      - name: convert rst to adoc
-        run: |
-          cd sync
-          find . -name "*.rst*" | while read i; do pandoc -f rst -t asciidoc "$i" -o "${i%.*}.adoc"; done
-          find . -name "*.rst" -type f -delete
-          mv product-docs controller-docs
-
       - name: commit files
         run: |
           git add . --all
-          git diff-index --quiet HEAD || git commit -m "Synchronize Controller docs to asciidoc"
+          git diff-index --quiet HEAD || git commit -m "[TEST] Synchronize Helm Chart content form OpenShift docs"
 
       - name: push changes
         uses: ad-m/github-push-action@master
